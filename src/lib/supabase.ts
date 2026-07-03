@@ -97,6 +97,7 @@ export const SKILLS = [
   'Helper/Labour',
   'Welder',
   'Tile Worker',
+  'other'
 ] as const;
 
 // Hardcoded per-skill market-rate table (₹/day): [min, max]
@@ -126,7 +127,7 @@ export const SCHEMES = [
       'Photo aur signature upload karein',
       'e-Shram card download/print karein',
     ],
-    videoUrl: 'https://www.youtube.com/watch?v=example-eshram',
+    videoUrl: 'https://youtu.be/mnWbxDTIzXQ?si=5Lml9jsvpnHXNFIR',
     helpline: '14434',
   },
   {
@@ -143,7 +144,7 @@ export const SCHEMES = [
       'Registration fee ₹25-50 pay karein',
       'Registration certificate collect karein',
     ],
-    videoUrl: 'https://www.youtube.com/watch?v=example-bocw',
+    videoUrl: 'https://youtu.be/1BoUrS40J2o?si=0GkgaDryjM9Vyt_k',
     helpline: '1800-200-1225',
   },
   {
@@ -160,7 +161,7 @@ export const SCHEMES = [
       'Confirmation SMS aayega 24-48 ghante mein',
       'Policy document bank se collect karein',
     ],
-    videoUrl: 'https://www.youtube.com/watch?v=example-pmsby',
+    videoUrl: 'https://youtu.be/OsrzeTvNQqk?si=YkajLETXLz8q4D9i',
     helpline: '1800-180-1111',
   },
 ];
