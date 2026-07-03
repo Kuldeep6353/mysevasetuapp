@@ -33,17 +33,23 @@ export default function App() {
     setLang(savedLang);
 
     const workerId = localStorage.getItem('mk_worker_id');
-    if (workerId) {
+    if (workerId && workerId.length > 10) {
       setScreen({ name: 'worker_dashboard', workerId });
       setReady(true);
       return;
     }
     const contractorName = localStorage.getItem('mk_contractor_name');
     const contractorPhone = localStorage.getItem('mk_contractor_phone');
-    if (contractorName && contractorPhone) {
+    if (contractorName && contractorPhone && contractorPhone.length === 10) {
       setScreen({ name: 'contractor_dashboard', contractorName, contractorPhone });
       setReady(true);
       return;
+    }
+    // Clear any stale/partial session data
+    if (workerId) localStorage.removeItem('mk_worker_id');
+    if (contractorName || contractorPhone) {
+      localStorage.removeItem('mk_contractor_name');
+      localStorage.removeItem('mk_contractor_phone');
     }
     setReady(true);
   }, []);

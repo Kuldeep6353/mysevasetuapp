@@ -35,7 +35,7 @@ export function AdminPanel({ onExit }: { onExit: () => void }) {
             <Icon.Tool size={18} className="text-white" />
           </div>
           <div>
-            <p className="font-display font-bold text-white text-sm leading-none">Mera Karigar</p>
+            <p className="font-display font-bold text-white text-sm leading-none">My Sevasetu</p>
             <p className="text-[10px] text-white/50 mt-0.5">Helpline Operations</p>
           </div>
         </div>

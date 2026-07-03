@@ -3,9 +3,11 @@ import { Icon } from '../components/Icons';
 import { Header } from '../components/ui';
 import { useToast } from '../components/Toast';
 import { supabase, SKILLS, type Worker } from '../lib/supabase';
-import type { Lang } from '../lib/i18n';
+import type { Lang, T } from '../lib/i18n';
+import { useT } from '../lib/i18n';
 
-export function WorkerOnboarding({ lang: _lang, onDone }: { lang: Lang; onDone: (w: Worker) => void }) {
+export function WorkerOnboarding({ lang, onDone }: { lang: Lang; onDone: (w: Worker) => void }) {
+  const t = useT(lang);
   const [step, setStep] = useState<1 | 2>(1);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -28,10 +30,8 @@ export function WorkerOnboarding({ lang: _lang, onDone }: { lang: Lang; onDone: 
   };
 
   const verifyOtp = async (otp: string) => {
-    // demo: accept any 4-digit code
     void otp;
     setSubmitting(true);
-    // get location (best effort, non-blocking)
     let lat: number | null = null, lng: number | null = null;
     try {
       const pos = await Promise.race([
@@ -62,7 +62,7 @@ export function WorkerOnboarding({ lang: _lang, onDone }: { lang: Lang; onDone: 
 
     if (error || !data) {
       setSubmitting(false);
-      toast('Profile save nahi hua. Phir se try karein.', 'error');
+      toast(t.profileSaveFail, 'error');
       return;
     }
 
@@ -73,14 +73,14 @@ export function WorkerOnboarding({ lang: _lang, onDone }: { lang: Lang; onDone: 
       photo_url: photo,
     });
 
-    toast('Profile ban gaya! Aap available hain.', 'success');
+    toast(t.profileCreated, 'success');
     setSubmitting(false);
     onDone(data as Worker);
   };
 
   return (
     <div className="min-h-screen">
-      <Header title={step === 1 ? 'Worker Profile' : 'OTP Verify'} onBack={step === 1 ? undefined : () => setStep(1)} />
+      <Header title={step === 1 ? t.workerProfile : t.otpVerify} onBack={step === 1 ? undefined : () => setStep(1)} />
       {step === 1 ? (
         <FormStep
           name={name} setName={setName}
@@ -91,9 +91,10 @@ export function WorkerOnboarding({ lang: _lang, onDone }: { lang: Lang; onDone: 
           womenSafety={womenSafety} setWomenSafety={setWomenSafety}
           canSubmit={canSubmit}
           onSubmit={submit}
+          t={t}
         />
       ) : (
-        <OtpStep phone={phone} onVerify={verifyOtp} submitting={submitting} />
+        <OtpStep phone={phone} onVerify={verifyOtp} submitting={submitting} t={t} />
       )}
     </div>
   );
@@ -108,17 +109,18 @@ function FormStep(props: {
   womenSafety: boolean; setWomenSafety: (b: boolean) => void;
   canSubmit: boolean;
   onSubmit: () => void;
+  t: T;
 }) {
   return (
     <div className="px-5 py-5 max-w-md mx-auto fade-in">
-      <PhotoCapture photo={props.photo} setPhoto={props.setPhoto} />
+      <PhotoCapture photo={props.photo} setPhoto={props.setPhoto} t={props.t} />
 
       <div className="mt-5 space-y-4">
         <div>
-          <label className="text-sm font-medium mb-1.5 block" style={{ color: '#0B1957' }}>Naam</label>
+          <label className="text-sm font-medium mb-1.5 block" style={{ color: '#0B1957' }}>{props.t.name}</label>
           <input
             className="input"
-            placeholder="Aapka pura naam"
+            placeholder={props.t.namePlaceholder}
             value={props.name}
             onChange={(e) => props.setName(e.target.value)}
             maxLength={40}
@@ -126,14 +128,14 @@ function FormStep(props: {
         </div>
 
         <div>
-          <label className="text-sm font-medium mb-1.5 block" style={{ color: '#0B1957' }}>Phone number</label>
+          <label className="text-sm font-medium mb-1.5 block" style={{ color: '#0B1957' }}>{props.t.phoneNumber}</label>
           <div className="flex items-center gap-2">
             <span className="input w-16 text-center font-semibold flex-shrink-0" style={{ background: 'rgba(11,25,87,0.04)' }}>+91</span>
             <input
               className="input flex-1"
               type="tel"
               inputMode="numeric"
-              placeholder="10 digit number"
+              placeholder={props.t.phonePlaceholder}
               value={props.phone}
               onChange={(e) => props.setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
             />
@@ -141,7 +143,7 @@ function FormStep(props: {
         </div>
 
         <div>
-          <label className="text-sm font-medium mb-1.5 block" style={{ color: '#0B1957' }}>Skill chunein</label>
+          <label className="text-sm font-medium mb-1.5 block" style={{ color: '#0B1957' }}>{props.t.chooseSkill}</label>
           <div className="flex flex-wrap gap-2">
             {SKILLS.map((s) => (
               <button
@@ -156,7 +158,7 @@ function FormStep(props: {
         </div>
 
         <div>
-          <label className="text-sm font-medium mb-1.5 block" style={{ color: '#0B1957' }}>Kaam kitni door tak?</label>
+          <label className="text-sm font-medium mb-1.5 block" style={{ color: '#0B1957' }}>{props.t.workDistance}</label>
           <div className="flex flex-wrap gap-2">
             {[2, 5, 10, 999].map((r) => (
               <button
@@ -164,7 +166,7 @@ function FormStep(props: {
                 onClick={() => props.setRadius(r)}
                 className={`chip ${props.radius === r ? 'chip-active' : ''}`}
               >
-                {r === 999 ? 'Anywhere' : `${r}km`}
+                {r === 999 ? props.t.anywhere : `${r}km`}
               </button>
             ))}
           </div>
@@ -182,8 +184,8 @@ function FormStep(props: {
             <Icon.Shield size={20} />
           </div>
           <div className="flex-1">
-            <p className="font-semibold text-sm" style={{ color: '#0B1957' }}>Main mahila hu — Suraksha features chahiye</p>
-            <p className="text-xs mt-0.5" style={{ color: 'rgba(11,25,87,0.5)' }}>SOS button + safety monitoring</p>
+            <p className="font-semibold text-sm" style={{ color: '#0B1957' }}>{props.t.womenSafetyTitle}</p>
+            <p className="text-xs mt-0.5" style={{ color: 'rgba(11,25,87,0.5)' }}>{props.t.womenSafetySub}</p>
           </div>
           <div
             className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0"
@@ -199,14 +201,14 @@ function FormStep(props: {
         disabled={!props.canSubmit}
         className="btn-primary w-full mt-6 text-base disabled:opacity-40 disabled:active:scale-100"
       >
-        Aage badho
+        {props.t.proceed}
         <Icon.ArrowRight size={20} />
       </button>
     </div>
   );
 }
 
-function PhotoCapture({ photo, setPhoto }: { photo: string | null; setPhoto: (s: string | null) => void }) {
+function PhotoCapture({ photo, setPhoto, t }: { photo: string | null; setPhoto: (s: string | null) => void; t: T }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [cameraOn, setCameraOn] = useState(false);
@@ -230,7 +232,7 @@ function PhotoCapture({ photo, setPhoto }: { photo: string | null; setPhoto: (s:
   };
 
   const stopCamera = () => {
-    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current?.getTracks().forEach((s) => s.stop());
     streamRef.current = null;
     setCameraOn(false);
   };
@@ -260,7 +262,7 @@ function PhotoCapture({ photo, setPhoto }: { photo: string | null; setPhoto: (s:
 
   return (
     <div className="flex flex-col items-center">
-      <label className="text-sm font-medium mb-2 self-start" style={{ color: '#0B1957' }}>Apni photo lein (selfie)</label>
+      <label className="text-sm font-medium mb-2 self-start" style={{ color: '#0B1957' }}>{t.takeSelfie}</label>
       {photo ? (
         <div className="relative">
           <img src={photo} alt="selfie" className="w-28 h-28 rounded-2xl object-cover" style={{ border: '2px solid #1D9E75' }} />
@@ -291,26 +293,26 @@ function PhotoCapture({ photo, setPhoto }: { photo: string | null; setPhoto: (s:
           style={{ background: '#fff', border: '2px dashed rgba(11,25,87,0.2)', color: 'rgba(11,25,87,0.5)' }}
         >
           <Icon.Camera size={28} />
-          <span className="text-xs font-medium">Photo lein</span>
+          <span className="text-xs font-medium">{t.photoPlaceholder}</span>
         </button>
       )}
       {cameraError && (
         <p className="text-xs mt-2 text-center" style={{ color: 'rgba(11,25,87,0.5)' }}>
-          Camera nahi mila. Niche se upload karein.
+          {t.cameraNotFound}
         </p>
       )}
       <input ref={fileRef} type="file" accept="image/*" capture="user" onChange={onFile} className="hidden" />
       {!photo && !cameraOn && (
         <button onClick={() => fileRef.current?.click()} className="btn-ghost text-xs mt-2">
           <Icon.Upload size={14} />
-          Gallery se upload
+          {t.galleryUpload}
         </button>
       )}
     </div>
   );
 }
 
-function OtpStep({ phone, onVerify, submitting }: { phone: string; onVerify: (otp: string) => void; submitting: boolean }) {
+function OtpStep({ phone, onVerify, submitting, t }: { phone: string; onVerify: (otp: string) => void; submitting: boolean; t: T }) {
   const [otp, setOtp] = useState(['', '', '', '']);
   const refs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -334,13 +336,13 @@ function OtpStep({ phone, onVerify, submitting }: { phone: string; onVerify: (ot
         <Icon.Lock size={30} style={{ color: '#1D9E75' }} />
       </div>
       <h2 className="font-display font-bold text-xl mb-1.5 text-center" style={{ color: '#0B1957' }}>
-        OTP verify karein
+        {t.otpVerifyTitle}
       </h2>
       <p className="text-sm text-center mb-1" style={{ color: 'rgba(11,25,87,0.5)' }}>
-        +91 {phone} par 4-digit code bheja gaya
+        {t.otpSentTo.replace('{0}', phone)}
       </p>
       <p className="text-xs text-center mb-8 max-w-xs" style={{ color: 'rgba(11,25,87,0.4)' }}>
-        Yeh aapka profile aaj pura din server par lock kar dega. Page refresh hone par bhi data safe rahega.
+        {t.otpLockNote}
       </p>
 
       <div className="flex gap-3 mb-8">
@@ -369,18 +371,18 @@ function OtpStep({ phone, onVerify, submitting }: { phone: string; onVerify: (ot
         {submitting ? (
           <>
             <Icon.RefreshCw size={20} className="animate-spin" />
-            Profile ban raha hai...
+            {t.creatingProfile}
           </>
         ) : (
           <>
-            Verify &amp; shuru karein
+            {t.verifyStart}
             <Icon.Check size={20} />
           </>
         )}
       </button>
 
       <p className="text-xs mt-4" style={{ color: 'rgba(11,25,87,0.4)' }}>
-        Demo: koi bhi 4 digit daalein
+        {t.otpDemoNote}
       </p>
     </div>
   );

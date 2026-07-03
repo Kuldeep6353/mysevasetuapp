@@ -27,7 +27,7 @@ export function Landing({
           </div>
           <div className="text-left">
             <h1 className="font-display font-extrabold text-2xl leading-none" style={{ color: '#0B1957' }}>
-              Mera Karigar
+              {t.appName}
             </h1>
             <p className="text-xs font-medium mt-0.5" style={{ color: 'rgba(11,25,87,0.5)' }}>
               {t.appTagline}
