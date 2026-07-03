@@ -115,7 +115,7 @@ export const MARKET_RATES: Record<string, [number, number]> = {
 export const SCHEMES = [
   {
     id: 'eshram',
-    name: 'e-Shram Card',
+    name: 'e-Shram bapa sitaram',
     desc: 'Mazdoor ka digital identity card. Accident cover ₹2 lakh.',
     benefit: '₹2 lakh accident cover · National worker ID',
     color: '#1D9E75',
