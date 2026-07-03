@@ -1,0 +1,139 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --navy: #0B1957;
+  --navy-700: #1A2A6B;
+  --navy-600: #2A3D8F;
+  --cream: #F8F3EA;
+  --sky: #9ECCFA;
+  --sky-200: #C5E0FB;
+  --sand: #E6D8C7;
+  --sand-200: #EFE5D8;
+  --green: #1D9E75;
+  --green-600: #17805E;
+  --red: #D85A30;
+  --amber: #BA7517;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--cream);
+  color: var(--navy);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, .font-display {
+  font-family: 'Poppins', system-ui, sans-serif;
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3.5 font-semibold text-white transition-all duration-200 active:scale-[0.97];
+    background: var(--navy);
+  }
+  .btn-primary:hover { background: var(--navy-700); box-shadow: 0 8px 24px -8px rgba(11,25,87,0.5); }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3.5 font-semibold transition-all duration-200 active:scale-[0.97];
+    background: var(--sand-200);
+    color: var(--navy);
+  }
+  .btn-secondary:hover { background: var(--sand); }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-medium transition-all duration-200 active:scale-[0.97];
+    color: var(--navy);
+  }
+  .btn-ghost:hover { background: rgba(11,25,87,0.06); }
+
+  .card {
+    @apply rounded-2xl p-5 transition-all duration-200;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(11,25,87,0.06), 0 1px 2px rgba(11,25,87,0.04);
+    border: 1px solid rgba(11,25,87,0.05);
+  }
+
+  .card-sand {
+    @apply rounded-2xl p-5 transition-all duration-200;
+    background: var(--sand-200);
+    border: 1px solid rgba(11,25,87,0.06);
+  }
+
+  .input {
+    @apply w-full rounded-xl px-4 py-3.5 text-base outline-none transition-all duration-200;
+    background: #fff;
+    border: 1.5px solid rgba(11,25,87,0.12);
+    color: var(--navy);
+  }
+  .input:focus { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(11,25,87,0.08); }
+  .input::placeholder { color: rgba(11,25,87,0.35); }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium cursor-pointer transition-all duration-200 active:scale-95;
+    border: 1.5px solid rgba(11,25,87,0.15);
+    background: #fff;
+    color: var(--navy);
+  }
+  .chip:hover { border-color: var(--navy); }
+  .chip-active {
+    background: var(--navy);
+    color: #fff;
+    border-color: var(--navy);
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold;
+  }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+.pulse-dot { animation: pulse-dot 1.4s ease-in-out infinite; }
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fade-in 0.25s ease-out; }
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(100%); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.slide-up { animation: slide-up 0.25s cubic-bezier(0.16,1,0.3,1); }
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(100%); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.slide-in-right { animation: slide-in-right 0.25s cubic-bezier(0.16,1,0.3,1); }
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, rgba(11,25,87,0.04) 25%, rgba(11,25,87,0.08) 50%, rgba(11,25,87,0.04) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes sos-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(216,90,48,0.5); }
+  50% { box-shadow: 0 0 0 16px rgba(216,90,48,0); }
+}
+.sos-pulse { animation: sos-pulse 1.8s infinite; }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: rgba(11,25,87,0.15); border-radius: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
