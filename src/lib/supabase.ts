@@ -53,6 +53,8 @@ export type Match = {
   created_at: string;
   arrived_at: string | null;
   completed_at: string | null;
+  arrival_confirmed_by: string | null;
+  arrival_confirmed_at: string | null;
 };
 
 export type Ticket = {
@@ -87,6 +89,29 @@ export type Activity = {
   photo_url: string | null;
   created_at: string;
 };
+
+export type EmergencyAlert = {
+  id: string;
+  user_type: string;
+  user_name: string;
+  user_phone: string;
+  emergency_type: string;
+  phone_number: string;
+  lat: number | null;
+  lng: number | null;
+  status: string;
+  created_at: string;
+  resolved_at: string | null;
+};
+
+export const EMERGENCY_NUMBERS = [
+  { key: 'police', labelKey: 'emergencyPolice', number: '100', color: '#2563EB', icon: 'Shield' },
+  { key: 'ambulance', labelKey: 'emergencyAmbulance', number: '108', color: '#DC2626', icon: 'Heart' },
+  { key: 'fire', labelKey: 'emergencyFire', number: '101', color: '#EA580C', icon: 'AlertTriangle' },
+  { key: 'women', labelKey: 'emergencyWomen', number: '1091', color: '#DB2777', icon: 'LifeBuoy' },
+  { key: 'child', labelKey: 'emergencyChild', number: '1098', color: '#7C3AED', icon: 'Users' },
+  { key: 'company', labelKey: 'emergencyCompany', number: '18002004400', color: '#0B1957', icon: 'PhoneCall' },
+] as const;
 
 export const SKILLS = [
   'Mason/Mistri',

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Icon } from '../components/Icons';
 import { EmptyState, Modal, Header, Skeleton } from '../components/ui';
 import { useToast } from '../components/Toast';
+import { EmergencySection } from '../components/EmergencyButton';
 import { supabase, MARKET_RATES, SCHEMES, type Worker, type Job } from '../lib/supabase';
 import { useJobs, useMatches, timeAgo, haversine, computeBharosa } from '../lib/hooks';
 import type { Lang, T } from '../lib/i18n';
@@ -116,25 +117,49 @@ export function WorkerDashboard({ lang, workerId, onExit }: { lang: Lang; worker
             <h2 className="font-display font-bold text-base mb-3 px-1" style={{ color: '#0B1957' }}>
               {t.arrivedConfirm}
             </h2>
-            {myMatches.filter((m) => m.status === 'accepted').map((m) => {
+            {myMatches.filter((m) => m.status === 'accepted' || m.status === 'arrived').map((m) => {
               const job = jobs?.find((j) => j.id === m.job_id);
               if (!job) return null;
+              const confirmed = m.arrival_confirmed_by === 'contractor';
+              const rejected = m.arrival_confirmed_by === 'rejected';
               return (
-                <div key={m.id} className="card flex items-center gap-3">
-                  <div className="flex-1">
-                    <p className="font-semibold text-sm" style={{ color: '#0B1957' }}>{job.skill} — {job.location_text}</p>
-                    <p className="text-xs mt-0.5" style={{ color: 'rgba(11,25,87,0.5)' }}>{t.confirmJobWarning}</p>
+                <div key={m.id} className="card">
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1">
+                      <p className="font-semibold text-sm" style={{ color: '#0B1957' }}>{job.skill} — {job.location_text}</p>
+                      <p className="text-xs mt-0.5" style={{ color: 'rgba(11,25,87,0.5)' }}>{t.confirmJobWarning}</p>
+                    </div>
+                    {m.status === 'accepted' && (
+                      <button
+                        onClick={async () => {
+                          await supabase.from('matches').update({ status: 'arrived', arrived_at: new Date().toISOString() }).eq('id', m.id);
+                          toast('Aap site par pahunch gaye. Contractor ki pushti ka wait karein.', 'success');
+                        }}
+                        className="btn-primary text-sm px-4 py-2.5"
+                      >
+                        <Icon.Check size={16} />
+                        {t.arrivedBtn}
+                      </button>
+                    )}
+                    {m.status === 'arrived' && !confirmed && !rejected && (
+                      <span className="badge text-xs" style={{ background: 'rgba(234,88,12,0.12)', color: '#EA580C' }}>
+                        <Icon.Clock size={12} className="inline mr-1" />
+                        {t.arrivalWaiting}
+                      </span>
+                    )}
+                    {m.status === 'arrived' && confirmed && (
+                      <span className="badge text-xs" style={{ background: 'rgba(29,158,117,0.12)', color: '#1D9E75' }}>
+                        <Icon.CheckCircle size={12} className="inline mr-1" />
+                        {t.arrivalConfirmedByContractor}
+                      </span>
+                    )}
+                    {m.status === 'arrived' && rejected && (
+                      <span className="badge text-xs" style={{ background: 'rgba(220,38,38,0.12)', color: '#DC2626' }}>
+                        <Icon.X size={12} className="inline mr-1" />
+                        {t.arrivalRejectedByContractor}
+                      </span>
+                    )}
                   </div>
-                  <button
-                    onClick={async () => {
-                      await supabase.from('matches').update({ status: 'arrived', arrived_at: new Date().toISOString() }).eq('id', m.id);
-                      toast('Aap site par pahunch gaye. Shabaash!', 'success');
-                    }}
-                    className="btn-primary text-sm px-4 py-2.5"
-                  >
-                    <Icon.Check size={16} />
-                    {t.arrivedBtn}
-                  </button>
                 </div>
               );
             })}
@@ -150,6 +175,9 @@ export function WorkerDashboard({ lang, workerId, onExit }: { lang: Lang; worker
         {/* Report issue */}
         <ReportIssue worker={worker} t={t} />
       </div>
+
+      {/* Emergency section — visible to everyone */}
+      <EmergencySection lang={lang} userType="worker" userName={worker.name} userPhone={worker.phone} />
 
       {/* SOS button */}
       {worker.women_safety && <SosButton worker={worker} t={t} />}

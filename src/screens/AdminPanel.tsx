@@ -2,8 +2,8 @@ import { useMemo, useState } from 'react';
 import { Icon } from '../components/Icons';
 import { Avatar, ScoreBadge, EmptyState, Modal, Skeleton } from '../components/ui';
 import { useToast } from '../components/Toast';
-import { supabase, SCHEMES, type Worker, type Job, type Ticket, type SosEvent, type Activity } from '../lib/supabase';
-import { useWorkers, useJobs, useTickets, useSosEvents, useActivity, timeAgo, computeBharosa } from '../lib/hooks';
+import { supabase, SCHEMES, EMERGENCY_NUMBERS, type Worker, type Job, type Ticket, type SosEvent, type Activity, type EmergencyAlert } from '../lib/supabase';
+import { useWorkers, useJobs, useTickets, useSosEvents, useEmergencyAlerts, useActivity, timeAgo, computeBharosa } from '../lib/hooks';
 
 type Tab = 'overview' | 'workers' | 'jobs' | 'tickets' | 'welfare' | 'safety';
 
@@ -13,6 +13,7 @@ export function AdminPanel({ onExit }: { onExit: () => void }) {
   const { data: jobs } = useJobs();
   const { data: tickets } = useTickets();
   const { data: sos } = useSosEvents();
+  const { data: emergencyAlerts } = useEmergencyAlerts();
   const { data: activity } = useActivity();
 
   const activeSos = (sos ?? []).filter((s) => s.status === 'active');
@@ -23,7 +24,7 @@ export function AdminPanel({ onExit }: { onExit: () => void }) {
     { id: 'jobs', label: 'Jobs', icon: <Icon.Briefcase size={18} />, badge: jobs?.filter((j) => j.status === 'open').length },
     { id: 'tickets', label: 'Tickets', icon: <Icon.LifeBuoy size={18} />, badge: tickets?.filter((t) => t.status !== 'resolved').length },
     { id: 'welfare', label: 'Welfare', icon: <Icon.Award size={18} /> },
-    { id: 'safety', label: 'Safety', icon: <Icon.Shield size={18} />, badge: activeSos.length || undefined },
+    { id: 'safety', label: 'Safety', icon: <Icon.Shield size={18} />, badge: (activeSos.length + (emergencyAlerts ?? []).filter((e) => e.status === 'active').length) || undefined },
   ];
 
   return (
@@ -90,7 +91,7 @@ export function AdminPanel({ onExit }: { onExit: () => void }) {
           {tab === 'jobs' && <JobsTab jobs={jobs} />}
           {tab === 'tickets' && <TicketsTab tickets={tickets} />}
           {tab === 'welfare' && <WelfareTab workers={workers} />}
-          {tab === 'safety' && <SafetyTab workers={workers} sos={sos} />}
+          {tab === 'safety' && <SafetyTab workers={workers} sos={sos} emergencyAlerts={emergencyAlerts} />}
         </div>
       </main>
     </div>
@@ -456,11 +457,13 @@ function WelfareTab({ workers }: { workers: Worker[] | null }) {
   );
 }
 
-function SafetyTab({ workers, sos }: { workers: Worker[] | null; sos: SosEvent[] | null }) {
+function SafetyTab({ workers, sos, emergencyAlerts }: { workers: Worker[] | null; sos: SosEvent[] | null; emergencyAlerts: EmergencyAlert[] | null }) {
   const { toast } = useToast();
   const womenWorkers = (workers ?? []).filter((w) => w.women_safety);
   const activeSos = (sos ?? []).filter((s) => s.status === 'active');
   const resolvedSos = (sos ?? []).filter((s) => s.status === 'resolved');
+  const activeEmergencies = (emergencyAlerts ?? []).filter((e) => e.status === 'active');
+  const resolvedEmergencies = (emergencyAlerts ?? []).filter((e) => e.status === 'resolved');
 
   return (
     <div className="space-y-5 fade-in">
@@ -497,6 +500,38 @@ function SafetyTab({ workers, sos }: { workers: Worker[] | null; sos: SosEvent[]
         </div>
       )}
 
+      {activeEmergencies.length > 0 && (
+        <div className="mb-5">
+          <h2 className="font-display font-bold text-sm mb-2" style={{ color: '#DC2626' }}>Emergency Alerts — Active</h2>
+          <div className="space-y-2">
+            {activeEmergencies.map((e) => {
+              const emInfo = EMERGENCY_NUMBERS.find((n) => n.key === e.emergency_type);
+              return (
+                <div key={e.id} className="card flex items-center gap-3 py-3" style={{ border: '1px solid rgba(220,38,38,0.2)' }}>
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: `${emInfo?.color ?? '#DC2626'}15` }}>
+                    <Icon.AlertTriangle size={18} style={{ color: emInfo?.color ?? '#DC2626' }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm" style={{ color: '#0B1957' }}>{e.user_name} — {emInfo ? emInfo.key : e.emergency_type}</p>
+                    <p className="text-xs" style={{ color: 'rgba(11,25,87,0.5)' }}>{e.user_phone} · Called {e.phone_number} · {timeAgo(e.created_at)}</p>
+                  </div>
+                  <a href={`tel:${e.phone_number}`} className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: 'rgba(220,38,38,0.1)' }}>
+                    <Icon.Phone size={16} style={{ color: '#DC2626' }} />
+                  </a>
+                  <button
+                    onClick={async () => { await supabase.from('emergency_alerts').update({ status: 'resolved', resolved_at: new Date().toISOString() }).eq('id', e.id); toast('Emergency resolved.', 'success'); }}
+                    className="text-xs font-semibold px-3 py-1.5 rounded-lg"
+                    style={{ background: 'rgba(11,25,87,0.08)', color: '#0B1957' }}
+                  >
+                    Resolve
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <div>
         <h2 className="font-display font-bold text-sm mb-2" style={{ color: '#0B1957' }}>Women workers — safety enabled</h2>
         {womenWorkers.length === 0 ? (
@@ -528,6 +563,23 @@ function SafetyTab({ workers, sos }: { workers: Worker[] | null; sos: SosEvent[]
                 <div className="flex-1">
                   <p className="text-sm" style={{ color: '#0B1957' }}>{s.worker_name}</p>
                   <p className="text-xs" style={{ color: 'rgba(11,25,87,0.4)' }}>Resolved {timeAgo(s.resolved_at ?? s.created_at)}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {resolvedEmergencies.length > 0 && (
+        <div>
+          <h2 className="font-display font-bold text-sm mb-2" style={{ color: "rgba(11,25,87,0.5)" }}>Resolved Emergencies</h2>
+          <div className="space-y-2">
+            {resolvedEmergencies.map((e) => (
+              <div key={e.id} className="card flex items-center gap-3 py-3 opacity-60">
+                <Icon.CheckCircle size={20} style={{ color: "#1D9E75" }} />
+                <div className="flex-1">
+                  <p className="text-sm" style={{ color: "#0B1957" }}>{e.user_name} — {e.emergency_type}</p>
+                  <p className="text-xs" style={{ color: "rgba(11,25,87,0.4)" }}>Resolved {timeAgo(e.resolved_at ?? e.created_at)}</p>
                 </div>
               </div>
             ))}

@@ -1,4 +1,5 @@
 import { Icon } from '../components/Icons';
+import { EmergencySection } from '../components/EmergencyButton';
 import type { Lang } from '../lib/i18n';
 import { useT } from '../lib/i18n';
 
@@ -81,6 +82,10 @@ export function Landing({
             <Icon.Heart size={14} style={{ color: '#D85A30' }} />
             {t.suraksha}
           </span>
+        </div>
+
+        <div className="mt-6">
+          <EmergencySection lang={lang} userType="contractor" userName="Guest" userPhone="0000000000" />
         </div>
 
         <button onClick={onAdmin} className="mt-8 text-sm font-medium underline" style={{ color: 'rgba(11,25,87,0.45)' }}>

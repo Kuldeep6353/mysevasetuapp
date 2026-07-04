@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase, type Worker, type Job, type Match, type Ticket, type SosEvent, type Activity } from './supabase';
+import { supabase, type Worker, type Job, type Match, type Ticket, type SosEvent, type Activity, type EmergencyAlert } from './supabase';
 
 export function useRealtime<T>(
   table: string,
@@ -55,6 +55,9 @@ export function useTickets() {
 }
 export function useSosEvents() {
   return useRealtime<SosEvent>('sos_events', '*', 'created_at', false);
+}
+export function useEmergencyAlerts() {
+  return useRealtime<EmergencyAlert>('emergency_alerts', '*', 'created_at', false);
 }
 export function useActivity() {
   return useRealtime<Activity>('activity', '*', 'created_at', true);

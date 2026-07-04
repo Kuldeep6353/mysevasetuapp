@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Icon } from '../components/Icons';
 import { Avatar, ScoreBadge, EmptyState, Header, Skeleton } from '../components/ui';
 import { useToast } from '../components/Toast';
+import { EmergencySection } from '../components/EmergencyButton';
 import { supabase, SKILLS, MARKET_RATES, type Job } from '../lib/supabase';
 import { useWorkers, useJobs, useMatches, matchScore, timeAgo } from '../lib/hooks';
 import type { Lang, T } from '../lib/i18n';
@@ -20,12 +21,12 @@ export function ContractorDashboard({ lang, contractorName, contractorPhone, onE
 
   // Map job_id -> list of workers who applied
   const applicantsByJob = useMemo(() => {
-    const map: Record<string, { name: string; skill: string; phone: string; photo_url: string | null; status: string }[]> = {};
+    const map: Record<string, { match_id: string; name: string; skill: string; phone: string; photo_url: string | null; status: string; arrival_confirmed_by: string | null }[]> = {};
     for (const m of matches ?? []) {
       const w = (workers ?? []).find((w) => w.id === m.worker_id);
       if (!w) continue;
       if (!map[m.job_id]) map[m.job_id] = [];
-      map[m.job_id].push({ name: w.name, skill: w.skills.join(', '), phone: w.phone, photo_url: w.photo_url, status: m.status });
+      map[m.job_id].push({ match_id: m.id, name: w.name, skill: w.skills.join(', '), phone: w.phone, photo_url: w.photo_url, status: m.status, arrival_confirmed_by: m.arrival_confirmed_by });
     }
     return map;
   }, [matches, workers]);
@@ -62,6 +63,11 @@ export function ContractorDashboard({ lang, contractorName, contractorPhone, onE
           </button>
         </div>
 
+        {/* Emergency section — visible to everyone */}
+        <div className="mb-5">
+          <EmergencySection lang={lang} userType="contractor" userName={contractorName} userPhone={contractorPhone} />
+        </div>
+
         {/* My posted jobs */}
         {myJobs.length > 0 && (
           <div className="mb-5">
@@ -69,7 +75,7 @@ export function ContractorDashboard({ lang, contractorName, contractorPhone, onE
             <div className="space-y-2">
               {myJobs.map((j) => {
                 const applicants = applicantsByJob[j.id] ?? [];
-                return <JobApplicantCard key={j.id} job={j} applicants={applicants} />;
+                return <JobApplicantCard key={j.id} job={j} applicants={applicants} t={t} />;
               })}
             </div>
           </div>
@@ -280,8 +286,9 @@ function FindWorkers({ t }: { t: T }) {
   );
 }
 
-function JobApplicantCard({ job, applicants }: { job: Job; applicants: { name: string; skill: string; phone: string; photo_url: string | null; status: string }[] }) {
+function JobApplicantCard({ job, applicants, t }: { job: Job; applicants: { match_id: string; name: string; skill: string; phone: string; photo_url: string | null; status: string; arrival_confirmed_by: string | null }[]; t: any }) {
   const [expanded, setExpanded] = useState(false);
+  const { toast } = useToast();
   return (
     <div className="card overflow-hidden">
       <button onClick={() => setExpanded(!expanded)} className="flex items-center gap-3 py-3 w-full text-left">
@@ -305,24 +312,64 @@ function JobApplicantCard({ job, applicants }: { job: Job; applicants: { name: s
             <p className="text-xs py-2" style={{ color: 'rgba(11,25,87,0.4)' }}>Abhi tak kisi worker ne apply nahi kiya.</p>
           ) : (
             applicants.map((a, i) => (
-              <div key={i} className="flex items-center gap-2.5 py-1.5">
-                {a.photo_url ? (
-                  <img src={a.photo_url} alt={a.name} className="w-8 h-8 rounded-full object-cover" />
-                ) : (
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'rgba(11,25,87,0.08)' }}>
-                    <Icon.User size={16} style={{ color: '#0B1957' }} />
+              <div key={i} className="py-2">
+                <div className="flex items-center gap-2.5">
+                  {a.photo_url ? (
+                    <img src={a.photo_url} alt={a.name} className="w-8 h-8 rounded-full object-cover" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'rgba(11,25,87,0.08)' }}>
+                      <Icon.User size={16} style={{ color: '#0B1957' }} />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate" style={{ color: '#0B1957' }}>{a.name}</p>
+                    <p className="text-xs" style={{ color: 'rgba(11,25,87,0.5)' }}>{a.skill}</p>
+                  </div>
+                  <a href={`tel:${a.phone}`} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(29,158,117,0.1)' }}>
+                    <Icon.Phone size={14} style={{ color: '#1D9E75' }} />
+                  </a>
+                  <span className="badge text-xs" style={{ background: a.status === 'accepted' ? 'rgba(29,158,117,0.12)' : a.status === 'arrived' ? 'rgba(234,88,12,0.12)' : 'rgba(11,25,87,0.08)', color: a.status === 'accepted' ? '#1D9E75' : a.status === 'arrived' ? '#EA580C' : 'rgba(11,25,87,0.5)' }}>
+                    {a.status}
+                  </span>
+                </div>
+                {a.status === 'arrived' && !a.arrival_confirmed_by && (
+                  <div className="flex gap-2 mt-2 ml-10">
+                    <button
+                      onClick={async () => {
+                        await supabase.from('matches').update({ arrival_confirmed_by: 'contractor', arrival_confirmed_at: new Date().toISOString() }).eq('id', a.match_id);
+                        toast(`${a.name} ki aamad ki pushti ho gayi.`, 'success');
+                      }}
+                      className="flex-1 text-xs font-semibold py-1.5 rounded-lg flex items-center justify-center gap-1"
+                      style={{ background: 'rgba(29,158,117,0.12)', color: '#1D9E75' }}
+                    >
+                      <Icon.Check size={14} />
+                      {t.confirmArrival}
+                    </button>
+                    <button
+                      onClick={async () => {
+                        await supabase.from('matches').update({ arrival_confirmed_by: 'rejected', arrival_confirmed_at: new Date().toISOString() }).eq('id', a.match_id);
+                        toast(`${a.name} ki aamad reject ki gayi.`, 'error');
+                      }}
+                      className="flex-1 text-xs font-semibold py-1.5 rounded-lg flex items-center justify-center gap-1"
+                      style={{ background: 'rgba(220,38,38,0.12)', color: '#DC2626' }}
+                    >
+                      <Icon.X size={14} />
+                      {t.rejectArrival}
+                    </button>
                   </div>
                 )}
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate" style={{ color: '#0B1957' }}>{a.name}</p>
-                  <p className="text-xs" style={{ color: 'rgba(11,25,87,0.5)' }}>{a.skill}</p>
-                </div>
-                <a href={`tel:${a.phone}`} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(29,158,117,0.1)' }}>
-                  <Icon.Phone size={14} style={{ color: '#1D9E75' }} />
-                </a>
-                <span className="badge text-xs" style={{ background: a.status === 'accepted' ? 'rgba(29,158,117,0.12)' : 'rgba(11,25,87,0.08)', color: a.status === 'accepted' ? '#1D9E75' : 'rgba(11,25,87,0.5)' }}>
-                  {a.status}
-                </span>
+                {a.status === 'arrived' && a.arrival_confirmed_by === 'contractor' && (
+                  <p className="text-xs mt-1 ml-10" style={{ color: '#1D9E75' }}>
+                    <Icon.CheckCircle size={12} className="inline mr-1" />
+                    {t.arrivalConfirmed}
+                  </p>
+                )}
+                {a.status === 'arrived' && a.arrival_confirmed_by === 'rejected' && (
+                  <p className="text-xs mt-1 ml-10" style={{ color: '#DC2626' }}>
+                    <Icon.X size={12} className="inline mr-1" />
+                    {t.arrivalRejected}
+                  </p>
+                )}
               </div>
             ))
           )}

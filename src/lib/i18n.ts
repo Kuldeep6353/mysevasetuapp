@@ -138,6 +138,25 @@ export type T = {
   fast30Sec: string;
   nameOrFirm: string;
   firmPlaceholder: string;
+  emergencyTitle: string;
+  emergencySub: string;
+  emergencySent: string;
+  emergencyPolice: string;
+  emergencyAmbulance: string;
+  emergencyFire: string;
+  emergencyWomen: string;
+  emergencyChild: string;
+  emergencyCompany: string;
+  arrivalPending: string;
+  arrivalConfirmed: string;
+  arrivalRejected: string;
+  confirmArrival: string;
+  rejectArrival: string;
+  workerArrived: string;
+  workerNotArrived: string;
+  arrivalWaiting: string;
+  arrivalConfirmedByContractor: string;
+  arrivalRejectedByContractor: string;
 };
 
 const translations: Record<Lang, T> = {
@@ -279,6 +298,25 @@ const translations: Record<Lang, T> = {
     fast30Sec: 'Fast, in 30 seconds',
     nameOrFirm: 'Name / Firm name',
     firmPlaceholder: 'Your or firm name',
+    emergencyTitle: 'Emergency',
+    emergencySub: 'Tap to call instantly. Admin will be notified.',
+    emergencySent: 'Emergency alert sent to admin. Calling now...',
+    emergencyPolice: 'Police',
+    emergencyAmbulance: 'Ambulance',
+    emergencyFire: 'Fire',
+    emergencyWomen: 'Women Helpline',
+    emergencyChild: 'Child Helpline',
+    emergencyCompany: 'Company Helpline',
+    arrivalPending: 'Arrival pending confirmation',
+    arrivalConfirmed: 'Arrival confirmed by contractor',
+    arrivalRejected: 'Arrival not confirmed',
+    confirmArrival: 'Confirm Arrival',
+    rejectArrival: 'Reject',
+    workerArrived: 'Worker arrived',
+    workerNotArrived: 'Worker did not arrive',
+    arrivalWaiting: 'Waiting for contractor confirmation',
+    arrivalConfirmedByContractor: 'Contractor confirmed your arrival',
+    arrivalRejectedByContractor: 'Contractor marked you as not arrived',
   },
   hi: {
     appTagline: 'नका. डिजिटल. तुरंत.',
@@ -418,6 +456,25 @@ const translations: Record<Lang, T> = {
     fast30Sec: 'तेज़, 30 सेकंड में',
     nameOrFirm: 'नाम / फ़र्म का नाम',
     firmPlaceholder: 'आपका या फ़र्म का नाम',
+    emergencyTitle: 'आपातकाल',
+    emergencySub: 'तुरंत कॉल करने के लिए टैप करें। एडमिन को सूचना दी जाएगी।',
+    emergencySent: 'आपातकालीन अलर्ट एडमिन को भेजा गया। कॉल हो रही है...',
+    emergencyPolice: 'पुलिस',
+    emergencyAmbulance: 'एम्बुलेंस',
+    emergencyFire: 'फायर',
+    emergencyWomen: 'महिला हेल्पलाइन',
+    emergencyChild: 'बाल हेल्पलाइन',
+    emergencyCompany: 'कंपनी हेल्पलाइन',
+    arrivalPending: 'पहुंच की पुष्टि लंबित',
+    arrivalConfirmed: 'कॉन्ट्रैक्टर ने पहुंच की पुष्टि की',
+    arrivalRejected: 'पहुंच की पुष्टि नहीं हुई',
+    confirmArrival: 'पहुंच की पुष्टि करें',
+    rejectArrival: 'अस्वीकार',
+    workerArrived: 'वर्कर पहुंच गया',
+    workerNotArrived: 'वर्कर नहीं पहुंचा',
+    arrivalWaiting: 'कॉन्ट्रैक्टर की पुष्टि का इंतज़ार',
+    arrivalConfirmedByContractor: 'कॉन्ट्रैक्टर ने आपकी पहुंच की पुष्टि की',
+    arrivalRejectedByContractor: 'कॉन्ट्रैक्टर ने आपको नहीं पहुंचा बताया',
   },
   gu: {
     appTagline: 'નાકા. ડિજિટલ. તુરત.',
@@ -557,6 +614,25 @@ const translations: Record<Lang, T> = {
     fast30Sec: 'ઝડપી, 30 સેકન્ડમાં',
     nameOrFirm: 'નામ / ફર્મનું નામ',
     firmPlaceholder: 'તમારું કે ફર્મનું નામ',
+    emergencyTitle: 'કટોકણી',
+    emergencySub: 'તરત કૉલ કરવા ટેપ કરો. એડમિનને સૂચિત કરવામાં આવશે.',
+    emergencySent: 'કટોકણી અલર્ટ એડમિનને મોકલાયો. કૉલ થઈ રહી છે...',
+    emergencyPolice: 'પોલીસ',
+    emergencyAmbulance: 'એમ્બ્યુલન્સ',
+    emergencyFire: 'ફાયર',
+    emergencyWomen: 'મહિલા હેલ્પલાઇન',
+    emergencyChild: 'બાળ હેલ્પલાઇન',
+    emergencyCompany: 'કંપની હેલ્પલાઇન',
+    arrivalPending: 'આવવાની પુષ્ટિ બાકી',
+    arrivalConfirmed: 'કોન્ટ્રાક્ટરે પુષ્ટિ કરી',
+    arrivalRejected: 'પુષ્ટિ નહીં',
+    confirmArrival: 'આવવાની પુષ્ટિ કરો',
+    rejectArrival: 'નકારો',
+    workerArrived: 'વર્કર આવી ગયો',
+    workerNotArrived: 'વર્કર નહીં આવ્યો',
+    arrivalWaiting: 'કોન્ટ્રાક્ટરની પુષ્ટિની રાહ',
+    arrivalConfirmedByContractor: 'કોન્ટ્રાક્ટરે તમારી આવવાની પુષ્ટિ કરી',
+    arrivalRejectedByContractor: 'કોન્ટ્રાક્ટરે તમને નહીં આવ્યા ગણાવ્યા',
   },
   mr: {
     appTagline: 'नाका. डिजिटल. तत्काळ.',
@@ -696,6 +772,25 @@ const translations: Record<Lang, T> = {
     fast30Sec: 'जलद, 30 सेकंदात',
     nameOrFirm: 'नाव / फर्मचे नाव',
     firmPlaceholder: 'तुमचे किंवा फर्मचे नाव',
+    emergencyTitle: 'आपत्कालीन',
+    emergencySub: 'त्वरित कॉल करण्यासाठी टॅप करा. अॅडमिनला कळवले जाईल.',
+    emergencySent: 'आपत्कालीन अलर्ट अॅडमिनला पाठवला. कॉल होत आहे...',
+    emergencyPolice: 'पोलीस',
+    emergencyAmbulance: 'रुग्णवाहिका',
+    emergencyFire: 'आग',
+    emergencyWomen: 'महिला हेल्पलाइन',
+    emergencyChild: 'बाल हेल्पलाइन',
+    emergencyCompany: 'कंपनी हेल्पलाइन',
+    arrivalPending: 'येण्याची पुष्टी बाकी',
+    arrivalConfirmed: 'कंत्राटदाराने पुष्टी केली',
+    arrivalRejected: 'पुष्टी नाही',
+    confirmArrival: 'येण्याची पुष्टी करा',
+    rejectArrival: 'नकार द्या',
+    workerArrived: 'वर्कर आला',
+    workerNotArrived: 'वर्कर आला नाही',
+    arrivalWaiting: 'कंत्राटदाराच्या पुष्टीची वाट पाहत आहे',
+    arrivalConfirmedByContractor: 'कंत्राटदाराने तुमचे येणे पुष्टी केले',
+    arrivalRejectedByContractor: 'कंत्राटदाराने तुम्हाला आले नाही असे दर्शवले',
   },
   ta: {
     appTagline: 'நகா. டிஜிட்டல். உடனடி.',
@@ -835,6 +930,25 @@ const translations: Record<Lang, T> = {
     fast30Sec: 'வேகமாக, 30 விநாடிகளில்',
     nameOrFirm: 'பெயர் / நிறுவனத்தின் பெயர்',
     firmPlaceholder: 'உங்கள் அல்லது நிறுவனத்தின் பெயர்',
+    emergencyTitle: 'அவசரம்',
+    emergencySub: 'உடனே அழைக்க தட்டவும். நிர்வாகத்திற்கு தெரிவிக்கப்படும்.',
+    emergencySent: 'அவசர எச்சரிக்கை நிர்வாகத்திற்கு அனுப்பப்பட்டது. அழைக்கிறது...',
+    emergencyPolice: 'காவல்துறை',
+    emergencyAmbulance: 'ஆம்புலன்ஸ்',
+    emergencyFire: 'தீ',
+    emergencyWomen: 'பெண்கள் ஹெல்ப்லைன்',
+    emergencyChild: 'குழந்தைகள் ஹெல்ப்லைன்',
+    emergencyCompany: 'நிறுவன ஹெல்ப்லைன்',
+    arrivalPending: 'வரவு உறுதிப்படுத்தல் நிலுவையில்',
+    arrivalConfirmed: 'ஒப்பந்ததாரர் வரவை உறுதிப்படுத்தினார்',
+    arrivalRejected: 'வரவு உறுதிப்படுத்தப்படவில்லை',
+    confirmArrival: 'வரவை உறுதிப்படுத்து',
+    rejectArrival: 'நிராகரி',
+    workerArrived: 'தொழிலாளி வந்துவிட்டார்',
+    workerNotArrived: 'தொழிலாளி வரவில்லை',
+    arrivalWaiting: 'ஒப்பந்ததாரர் உறுதிப்படுத்தலுக்காக காத்திருக்கிறது',
+    arrivalConfirmedByContractor: 'ஒப்பந்ததாரர் உங்கள் வரவை உறுதிப்படுத்தினார்',
+    arrivalRejectedByContractor: 'ஒப்பந்ததாரர் நீங்கள் வரவில்லை என்றார்',
   },
   te: {
     appTagline: 'నక. డిజిటల్. వెంటనే.',
@@ -974,6 +1088,25 @@ const translations: Record<Lang, T> = {
     fast30Sec: 'వేగంగా, 30 సెకన్లలో',
     nameOrFirm: 'పేరు / సంస్థ పేరు',
     firmPlaceholder: 'మీ లేదా సంస్థ పేరు',
+    emergencyTitle: 'అత్యవసరం',
+    emergencySub: 'తక్షణం కాల్ చేయడానికి ట్యాప్ చేయండి. అడ్మినకు సూచించబడుతుంది.',
+    emergencySent: 'అత్యవసర హెచ్చరిక అడ్మిన్‌కు పంపబడింది. కాల్ అవుతోంది...',
+    emergencyPolice: 'పోలీస్',
+    emergencyAmbulance: 'అంబులెన్స్',
+    emergencyFire: 'అగ్ని',
+    emergencyWomen: 'మహిళా హెల్ప్‌లైన్',
+    emergencyChild: 'బాల హెల్ప్‌లైన్',
+    emergencyCompany: 'కంపెనీ హెల్ప్‌లైన్',
+    arrivalPending: 'రాక నిర్ధారణ పడివుంది',
+    arrivalConfirmed: 'కాంట్రాక్టర్ రాకను నిర్ధారించారు',
+    arrivalRejected: 'రాక నిర్ధారించబడలేదు',
+    confirmArrival: 'రాకను నిర్ధారించండి',
+    rejectArrival: 'తిరస్కరించు',
+    workerArrived: 'వర్కర్ వచ్చారు',
+    workerNotArrived: 'వర్కర్ రాలేదు',
+    arrivalWaiting: 'కాంట్రాక్టర్ నిర్ధారణ కోసం వేచి ఉంది',
+    arrivalConfirmedByContractor: 'కాంట్రాక్టర్ మీ రాకను నిర్ధారించారు',
+    arrivalRejectedByContractor: 'కాంట్రాక్టర్ మీరు రాలేదని చెప్పారు',
   },
 };
 
