@@ -490,31 +490,7 @@ function RegisterModal({ scheme, lang, isReg, onClose, onRegister }: {
           <p className="text-sm leading-relaxed" style={{ color: 'rgba(11,25,87,0.7)' }}>{scheme.desc}</p>
 
           {/* Video tutorial */}
-          <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(11,25,87,0.08)' }}>
-            <div className="flex items-center gap-3 p-3" style={{ background: 'rgba(11,25,87,0.03)' }}>
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: '#D85A30' }}>
-                <Icon.Image size={18} className="text-white" />
-              </div>
-              <div className="flex-1">
-                <p className="font-semibold text-sm" style={{ color: '#0B1957' }}>{t.schemeVideoHelp}</p>
-                <p className="text-xs" style={{ color: 'rgba(11,25,87,0.5)' }}>Step-by-step video guide</p>
-              </div>
-            </div>
-            <div className="relative" style={{ background: '#0B1957', aspectRatio: '16/9' }}>
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
-                <div className="w-14 h-14 rounded-full flex items-center justify-center mb-2" style={{ background: 'rgba(255,255,255,0.15)' }}>
-                  <div className="w-0 h-0 border-y-[10px] border-y-transparent border-l-[16px] border-l-white ml-1" />
-                </div>
-                <p className="text-xs opacity-80">Video tutorial</p>
-              </div>
-              <img
-                src="https://images.pexels.com/photos/5905902/pexels-photo-5905902.jpeg?auto=compress&cs=tinysrgb&w=400"
-                alt="tutorial"
-                className="w-full h-full object-cover opacity-40"
-                loading="lazy"
-              />
-            </div>
-          </div>
+          <YouTubePlayer url={scheme.videoUrl} title={t.schemeVideoHelp} />
 
           {/* Step-by-step guide */}
           <div>
@@ -691,5 +667,86 @@ function SosButton({ worker, t }: { worker: Worker; t: T }) {
         </div>
       </Modal>
     </>
+  );
+}
+
+function getYouTubeId(url: string): string | null {
+  const patterns = [
+    /youtu\.be\/([a-zA-Z0-9_-]{11})/,
+    /youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+    /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+    /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
+  ];
+  for (const p of patterns) {
+    const m = url.match(p);
+    if (m) return m[1];
+  }
+  return null;
+}
+
+function YouTubePlayer({ url, title }: { url: string; title: string }) {
+  const [playing, setPlaying] = useState(false);
+  const videoId = getYouTubeId(url);
+
+  if (!videoId) {
+    return (
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block rounded-xl overflow-hidden"
+        style={{ border: '1px solid rgba(11,25,87,0.08)' }}
+      >
+        <div className="flex items-center gap-3 p-3" style={{ background: 'rgba(11,25,87,0.03)' }}>
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: '#D85A30' }}>
+            <Icon.Play size={18} className="text-white" />
+          </div>
+          <div className="flex-1">
+            <p className="font-semibold text-sm" style={{ color: '#0B1957' }}>{title}</p>
+            <p className="text-xs" style={{ color: 'rgba(11,25,87,0.5)' }}>Open video on YouTube</p>
+          </div>
+        </div>
+      </a>
+    );
+  }
+
+  const thumb = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+
+  return (
+    <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(11,25,87,0.08)' }}>
+      <div className="flex items-center gap-3 p-3" style={{ background: 'rgba(11,25,87,0.03)' }}>
+        <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: '#D85A30' }}>
+          <Icon.Play size={18} className="text-white" />
+        </div>
+        <div className="flex-1">
+          <p className="font-semibold text-sm" style={{ color: '#0B1957' }}>{title}</p>
+          <p className="text-xs" style={{ color: 'rgba(11,25,87,0.5)' }}>Tap play to watch</p>
+        </div>
+      </div>
+      <div className="relative" style={{ aspectRatio: '16/9', background: '#000' }}>
+        {playing ? (
+          <iframe
+            src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1`}
+            title={title}
+            className="absolute inset-0 w-full h-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            referrerPolicy="strict-origin-when-cross-origin"
+          />
+        ) : (
+          <button
+            onClick={() => setPlaying(true)}
+            className="absolute inset-0 w-full h-full flex items-center justify-center group"
+            aria-label="Play video"
+          >
+            <img src={thumb} alt={title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+            <span className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+            <span className="relative w-16 h-16 rounded-full flex items-center justify-center transition-transform group-hover:scale-110 group-active:scale-95" style={{ background: 'rgba(217,90,48,0.95)' }}>
+              <span className="w-0 h-0 border-y-[11px] border-y-transparent border-l-[18px] border-l-white ml-1" />
+            </span>
+          </button>
+        )}
+      </div>
+    </div>
   );
 }

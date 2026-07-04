@@ -167,4 +167,7 @@ export const Icon = {
   Crosshair: ({ size, ...p }: IconProps) => (
     <svg {...base(size)} {...p}><circle cx="12" cy="12" r="10" /><path d="M22 12h-4M6 12H2M12 6V2M12 22v-4" /></svg>
   ),
+  Play: ({ size, ...p }: IconProps) => (
+    <svg {...base(size)} {...p} fill="currentColor" stroke="none"><path d="M8 5v14l11-7z" /></svg>
+  ),
 };
