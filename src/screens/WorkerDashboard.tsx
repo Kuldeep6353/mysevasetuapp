@@ -85,8 +85,22 @@ export function WorkerDashboard({ lang, workerId, onExit }: { lang: Lang; worker
             <div className="space-y-3">
               {matchingJobs.map((job) => (
                 <JobCard key={job.id} job={job} worker={worker} t={t} onAccept={async () => {
-                  await supabase.from('matches').insert({ worker_id: worker.id, job_id: job.id, status: 'accepted' });
-                  await supabase.from('jobs').update({ workers_filled: Math.min(job.workers_filled + 1, job.workers_needed) }).eq('id', job.id);
+                  // Insert match (unique constraint prevents duplicates)
+                  const { error: matchErr } = await supabase.from('matches').insert({ worker_id: worker.id, job_id: job.id, status: 'accepted' });
+                  if (matchErr) {
+                    if (matchErr.code === '23505') {
+                      toast('Aapne ye kaam pehle accept kiya hai.', 'error');
+                    } else {
+                      toast('Accept karne mein error. Phir try karein.', 'error');
+                    }
+                    return;
+                  }
+                  // Atomically increment workers_filled using latest DB value
+                  const { data: fresh } = await supabase.from('jobs').select('workers_filled, workers_needed').eq('id', job.id).maybeSingle();
+                  const cur = fresh?.workers_filled ?? 0;
+                  const need = fresh?.workers_needed ?? job.workers_needed;
+                  const newFilled = Math.min(cur + 1, need);
+                  await supabase.from('jobs').update({ workers_filled: newFilled, status: newFilled >= need ? 'closed' : 'open' }).eq('id', job.id);
                   await supabase.from('workers').update({ status: 'on_job', jobs_accepted: worker.jobs_accepted + 1 }).eq('id', worker.id);
                   await supabase.from('activity').insert({ event_type: 'worker_matched', actor_name: worker.name, detail: `accepted ${job.skill} job`, photo_url: worker.photo_url });
                   toast('Kaam accept kiya! Site par pahunch kar confirm karein.', 'success');
@@ -686,6 +700,7 @@ function getYouTubeId(url: string): string | null {
 
 function YouTubePlayer({ url, title }: { url: string; title: string }) {
   const [playing, setPlaying] = useState(false);
+  const [thumbOk, setThumbOk] = useState(true);
   const videoId = getYouTubeId(url);
 
   if (!videoId) {
@@ -710,7 +725,7 @@ function YouTubePlayer({ url, title }: { url: string; title: string }) {
     );
   }
 
-  const thumb = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+  const thumb = `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`;
 
   return (
     <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(11,25,87,0.08)' }}>
@@ -723,15 +738,14 @@ function YouTubePlayer({ url, title }: { url: string; title: string }) {
           <p className="text-xs" style={{ color: 'rgba(11,25,87,0.5)' }}>Tap play to watch</p>
         </div>
       </div>
-      <div className="relative" style={{ aspectRatio: '16/9', background: '#000' }}>
+      <div className="relative" style={{ aspectRatio: '16/9', background: '#0B1957' }}>
         {playing ? (
           <iframe
-            src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1`}
+            src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1`}
             title={title}
             className="absolute inset-0 w-full h-full"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowFullScreen
-            referrerPolicy="strict-origin-when-cross-origin"
           />
         ) : (
           <button
@@ -739,8 +753,16 @@ function YouTubePlayer({ url, title }: { url: string; title: string }) {
             className="absolute inset-0 w-full h-full flex items-center justify-center group"
             aria-label="Play video"
           >
-            <img src={thumb} alt={title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            <span className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+            {thumbOk && (
+              <img
+                src={thumb}
+                alt={title}
+                className="absolute inset-0 w-full h-full object-cover"
+                loading="lazy"
+                onError={() => setThumbOk(false)}
+              />
+            )}
+            <span className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors" />
             <span className="relative w-16 h-16 rounded-full flex items-center justify-center transition-transform group-hover:scale-110 group-active:scale-95" style={{ background: 'rgba(217,90,48,0.95)' }}>
               <span className="w-0 h-0 border-y-[11px] border-y-transparent border-l-[18px] border-l-white ml-1" />
             </span>

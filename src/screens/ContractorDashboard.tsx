@@ -2,8 +2,8 @@ import { useMemo, useState } from 'react';
 import { Icon } from '../components/Icons';
 import { Avatar, ScoreBadge, EmptyState, Header, Skeleton } from '../components/ui';
 import { useToast } from '../components/Toast';
-import { supabase, SKILLS, MARKET_RATES } from '../lib/supabase';
-import { useWorkers, useJobs, matchScore, timeAgo } from '../lib/hooks';
+import { supabase, SKILLS, MARKET_RATES, type Job } from '../lib/supabase';
+import { useWorkers, useJobs, useMatches, matchScore, timeAgo } from '../lib/hooks';
 import type { Lang, T } from '../lib/i18n';
 import { useT } from '../lib/i18n';
 
@@ -11,10 +11,24 @@ export function ContractorDashboard({ lang, contractorName, contractorPhone, onE
   const t = useT(lang);
   const [tab, setTab] = useState<'post' | 'match'>('post');
   const { data: jobs } = useJobs();
+  const { data: matches } = useMatches();
+  const { data: workers } = useWorkers();
   const myJobs = useMemo(
     () => (jobs ?? []).filter((j) => j.contractor_phone === contractorPhone).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()),
     [jobs, contractorPhone],
   );
+
+  // Map job_id -> list of workers who applied
+  const applicantsByJob = useMemo(() => {
+    const map: Record<string, { name: string; skill: string; phone: string; photo_url: string | null; status: string }[]> = {};
+    for (const m of matches ?? []) {
+      const w = (workers ?? []).find((w) => w.id === m.worker_id);
+      if (!w) continue;
+      if (!map[m.job_id]) map[m.job_id] = [];
+      map[m.job_id].push({ name: w.name, skill: w.skills.join(', '), phone: w.phone, photo_url: w.photo_url, status: m.status });
+    }
+    return map;
+  }, [matches, workers]);
 
   return (
     <div className="min-h-screen">
@@ -53,22 +67,10 @@ export function ContractorDashboard({ lang, contractorName, contractorPhone, onE
           <div className="mb-5">
             <h2 className="font-display font-bold text-sm mb-2 px-1" style={{ color: '#0B1957' }}>{t.contractorPostedJobs}</h2>
             <div className="space-y-2">
-              {myJobs.map((j) => (
-                <div key={j.id} className="card flex items-center gap-3 py-3">
-                  <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: 'rgba(11,25,87,0.06)' }}>
-                    <Icon.Briefcase size={18} style={{ color: '#0B1957' }} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm" style={{ color: '#0B1957' }}>{j.skill} · {j.location_text}</p>
-                    <p className="text-xs" style={{ color: 'rgba(11,25,87,0.5)' }}>
-                      {j.workers_filled}/{j.workers_needed} filled · ₹{j.per_day_wage}/day · {timeAgo(j.created_at)}
-                    </p>
-                  </div>
-                  <span className="badge" style={{ background: j.status === 'open' ? 'rgba(29,158,117,0.12)' : 'rgba(11,25,87,0.08)', color: j.status === 'open' ? '#1D9E75' : 'rgba(11,25,87,0.5)' }}>
-                    {j.status}
-                  </span>
-                </div>
-              ))}
+              {myJobs.map((j) => {
+                const applicants = applicantsByJob[j.id] ?? [];
+                return <JobApplicantCard key={j.id} job={j} applicants={applicants} />;
+              })}
             </div>
           </div>
         )}
@@ -274,6 +276,58 @@ function FindWorkers({ t }: { t: T }) {
         <Icon.Lock size={14} className="flex-shrink-0 mt-0.5" />
         {t.privacyNote}
       </div>
+    </div>
+  );
+}
+
+function JobApplicantCard({ job, applicants }: { job: Job; applicants: { name: string; skill: string; phone: string; photo_url: string | null; status: string }[] }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div className="card overflow-hidden">
+      <button onClick={() => setExpanded(!expanded)} className="flex items-center gap-3 py-3 w-full text-left">
+        <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: 'rgba(11,25,87,0.06)' }}>
+          <Icon.Briefcase size={18} style={{ color: '#0B1957' }} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-sm" style={{ color: '#0B1957' }}>{job.skill} · {job.location_text}</p>
+          <p className="text-xs" style={{ color: 'rgba(11,25,87,0.5)' }}>
+            {job.workers_filled}/{job.workers_needed} filled · ₹{job.per_day_wage}/day · {timeAgo(job.created_at)}
+          </p>
+        </div>
+        <span className="badge" style={{ background: job.status === 'open' ? 'rgba(29,158,117,0.12)' : 'rgba(11,25,87,0.08)', color: job.status === 'open' ? '#1D9E75' : 'rgba(11,25,87,0.5)' }}>
+          {job.status}
+        </span>
+        <Icon.ChevronDown size={16} style={{ color: 'rgba(11,25,87,0.4)', transform: expanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+      </button>
+      {expanded && (
+        <div className="px-3 pb-3 pt-1 space-y-2" style={{ borderTop: '1px solid rgba(11,25,87,0.06)' }}>
+          {applicants.length === 0 ? (
+            <p className="text-xs py-2" style={{ color: 'rgba(11,25,87,0.4)' }}>Abhi tak kisi worker ne apply nahi kiya.</p>
+          ) : (
+            applicants.map((a, i) => (
+              <div key={i} className="flex items-center gap-2.5 py-1.5">
+                {a.photo_url ? (
+                  <img src={a.photo_url} alt={a.name} className="w-8 h-8 rounded-full object-cover" />
+                ) : (
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'rgba(11,25,87,0.08)' }}>
+                    <Icon.User size={16} style={{ color: '#0B1957' }} />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm truncate" style={{ color: '#0B1957' }}>{a.name}</p>
+                  <p className="text-xs" style={{ color: 'rgba(11,25,87,0.5)' }}>{a.skill}</p>
+                </div>
+                <a href={`tel:${a.phone}`} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(29,158,117,0.1)' }}>
+                  <Icon.Phone size={14} style={{ color: '#1D9E75' }} />
+                </a>
+                <span className="badge text-xs" style={{ background: a.status === 'accepted' ? 'rgba(29,158,117,0.12)' : 'rgba(11,25,87,0.08)', color: a.status === 'accepted' ? '#1D9E75' : 'rgba(11,25,87,0.5)' }}>
+                  {a.status}
+                </span>
+              </div>
+            ))
+          )}
+        </div>
+      )}
     </div>
   );
 }
