@@ -9,29 +9,26 @@ export function useRealtime<T>(
 ): { data: T[] | null; loading: boolean; error: string | null } {
   const [data, setData] = useState<T[] | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
 
     const fetchData = async () => {
-      let query = supabase.from(table).select(select);
-      if (orderBy) query = query.order(orderBy, { ascending });
-      const { data: result, error: e } = await query;
+      let q = supabase.from(table).select(select);
+      if (orderBy) q = q.order(orderBy, { ascending });
+      const { data: rows, error: e } = await q;
       if (!active) return;
       if (e) {
-        setError(e.message);
+        console.error(`useRealtime(${table}) error:`, e.message);
         setData([]);
       } else {
-        setData(result as T[]);
-        setError(null);
+        setData(rows as T[]);
       }
       setLoading(false);
     };
 
-    fetchData().catch(() => {
-      if (active) { setData([]); setLoading(false); }
-    });
+    fetchData();
 
     const channel = supabase
       .channel(`rt-${table}-${Math.random().toString(36).slice(2)}`)
