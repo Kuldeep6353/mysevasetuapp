@@ -11,11 +11,17 @@ const LANGS: { code: Lang; native: string; english: string }[] = [
   { code: 'te', native: 'తెలుగు', english: 'Telugu' },
 ];
 
-export function LanguageSelect({ onPick }: { onPick: (code: Lang) => void }) {
+export function LanguageSelect({ onPick, onBack }: { onPick: (code: Lang) => void; onBack?: () => void }) {
   const t = useT('hi');
   return (
     <div className="min-h-screen flex flex-col px-5 py-8 fade-in">
       <div className="max-w-md mx-auto w-full flex-1 flex flex-col">
+        {onBack && (
+          <button onClick={onBack} className="flex items-center gap-1.5 mb-3 text-sm font-semibold" style={{ color: '#0B1957' }}>
+            <Icon.ArrowLeft size={20} />
+            Back
+          </button>
+        )}
         <div className="flex items-center gap-2.5 mb-2">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: '#0B1957' }}>
             <Icon.Globe size={20} className="text-white" />

@@ -7,7 +7,7 @@ import { useWorkers, useJobs, useTickets, useSosEvents, useEmergencyAlerts, useA
 
 type Tab = 'overview' | 'workers' | 'jobs' | 'tickets' | 'welfare' | 'safety';
 
-export function AdminPanel({ onExit }: { onExit: () => void }) {
+export function AdminPanel({ onExit, onBack }: { onExit: () => void; onBack?: () => void }) {
   const [tab, setTab] = useState<Tab>('overview');
   const { data: workers } = useWorkers();
   const { data: jobs } = useJobs();
@@ -86,6 +86,12 @@ export function AdminPanel({ onExit }: { onExit: () => void }) {
       <main className="flex-1 sm:ml-60 pt-11 sm:pt-11" style={{ background: '#F8F3EA' }}>
         <div className="sm:hidden h-12" />
         <div className="p-4 sm:p-6 max-w-5xl">
+          {onBack && (
+            <button onClick={onBack} className="sm:hidden flex items-center gap-1.5 mb-3 text-sm font-semibold" style={{ color: '#0B1957' }}>
+              <Icon.ArrowLeft size={20} />
+              Back
+            </button>
+          )}
           {tab === 'overview' && <Overview workers={workers} jobs={jobs} activity={activity} sos={sos} />}
           {tab === 'workers' && <WorkersTab workers={workers} />}
           {tab === 'jobs' && <JobsTab jobs={jobs} />}

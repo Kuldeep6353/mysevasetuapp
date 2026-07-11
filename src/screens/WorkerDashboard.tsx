@@ -8,7 +8,7 @@ import { useJobs, useMatches, timeAgo, haversine, computeBharosa } from '../lib/
 import type { Lang, T } from '../lib/i18n';
 import { useT } from '../lib/i18n';
 
-export function WorkerDashboard({ lang, workerId, onExit }: { lang: Lang; workerId: string; onExit: () => void }) {
+export function WorkerDashboard({ lang, workerId, onExit, onBack }: { lang: Lang; workerId: string; onExit: () => void; onBack?: () => void }) {
   const t = useT(lang);
   const [worker, setWorker] = useState<Worker | null>(null);
   const [loading, setLoading] = useState(true);
@@ -57,6 +57,7 @@ export function WorkerDashboard({ lang, workerId, onExit }: { lang: Lang; worker
     <div className="min-h-screen pb-24">
       <Header
         title={`${t.namaste}, ${worker.name.split(' ')[0]}`}
+        onBack={onBack}
         right={
           <button onClick={onExit} className="btn-ghost p-2 -mr-2">
             <Icon.LogOut size={20} />

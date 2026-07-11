@@ -6,7 +6,7 @@ import { useT } from '../lib/i18n';
 
 type Step = 'auth' | 'agreement' | 'role';
 
-export function AuthScreen({ lang, onAuthed }: { lang: Lang; onAuthed: (role: 'worker' | 'contractor', userId: string, email: string) => void }) {
+export function AuthScreen({ lang, onAuthed, onBack }: { lang: Lang; onAuthed: (role: 'worker' | 'contractor', userId: string, email: string) => void; onBack?: () => void }) {
   const t = useT(lang);
   const [step, setStep] = useState<Step>('auth');
   const [mode, setMode] = useState<'login' | 'signup'>('login');
@@ -100,6 +100,12 @@ export function AuthScreen({ lang, onAuthed }: { lang: Lang; onAuthed: (role: 'w
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ background: '#F8F3EA' }}>
       <div className="w-full max-w-md">
+        {step === 'auth' && onBack && (
+          <button onClick={onBack} className="flex items-center gap-1.5 mb-4 text-sm font-semibold" style={{ color: '#0B1957' }}>
+            <Icon.ArrowLeft size={20} />
+            Back
+          </button>
+        )}
         {/* Logo */}
         <div className="text-center mb-6">
           <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-3" style={{ background: '#0B1957' }}>

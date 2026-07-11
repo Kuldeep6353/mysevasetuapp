@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { Icon } from '../components/Icons';
+import { Header } from '../components/ui';
 import { useToast } from '../components/Toast';
 import type { Lang } from '../lib/i18n';
 import { useT } from '../lib/i18n';
@@ -15,7 +16,7 @@ type UserProfile = {
   created_at: string;
 };
 
-export function ProfileDashboard({ lang, userId, onLogout, onAccountDeleted }: { lang: Lang; userId: string; onLogout: () => void; onAccountDeleted: () => void }) {
+export function ProfileDashboard({ lang, userId, onLogout, onAccountDeleted, onBack }: { lang: Lang; userId: string; onLogout: () => void; onAccountDeleted: () => void; onBack?: () => void }) {
   const t = useT(lang);
   const { toast } = useToast();
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -78,7 +79,9 @@ export function ProfileDashboard({ lang, userId, onLogout, onAccountDeleted }: {
   }
 
   return (
-    <div className="max-w-md mx-auto p-4 space-y-4">
+    <div className="max-w-md mx-auto">
+      <Header title={t.profileTitle} onBack={onBack} />
+      <div className="px-4 pb-4 space-y-4">
       {/* Header */}
       <div className="text-center mb-4">
         <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-3" style={{ background: '#0B1957' }}>
@@ -188,6 +191,7 @@ export function ProfileDashboard({ lang, userId, onLogout, onAccountDeleted }: {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

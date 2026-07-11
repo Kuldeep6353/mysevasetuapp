@@ -8,7 +8,7 @@ import { useWorkers, useJobs, useMatches, matchScore, timeAgo } from '../lib/hoo
 import type { Lang, T } from '../lib/i18n';
 import { useT } from '../lib/i18n';
 
-export function ContractorDashboard({ lang, contractorName, contractorPhone, onExit }: { lang: Lang; contractorName: string; contractorPhone: string; onExit: () => void }) {
+export function ContractorDashboard({ lang, contractorName, contractorPhone, onExit, onBack }: { lang: Lang; contractorName: string; contractorPhone: string; onExit: () => void; onBack?: () => void }) {
   const t = useT(lang);
   const [tab, setTab] = useState<'post' | 'match'>('post');
   const { data: jobs } = useJobs();
@@ -35,6 +35,7 @@ export function ContractorDashboard({ lang, contractorName, contractorPhone, onE
     <div className="min-h-screen">
       <Header
         title={contractorName.split(' ')[0]}
+        onBack={onBack}
         right={
           <button onClick={onExit} className="btn-ghost p-2 -mr-2">
             <Icon.LogOut size={20} />

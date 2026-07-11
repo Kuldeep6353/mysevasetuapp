@@ -165,11 +165,12 @@ export default function App() {
           />
         )}
         {screen.name === 'language' && (
-          <LanguageSelect onPick={pickLang} />
+          <LanguageSelect onPick={pickLang} onBack={() => setScreen({ name: 'landing' })} />
         )}
         {screen.name === 'auth' && (
           <AuthScreen
             lang={lang}
+            onBack={() => setScreen({ name: 'language' })}
             onAuthed={(role, userId, email) => {
               setAuthState({ userId, email, role });
               if (role === 'worker') {
@@ -206,6 +207,7 @@ export default function App() {
             <WorkerDashboard
               lang={lang}
               workerId={screen.workerId}
+              onBack={() => setScreen({ name: 'profile', userId: authState?.userId ?? '' })}
               onExit={() => {
                 localStorage.removeItem('mk_worker_id');
                 supabase.auth.signOut();
@@ -235,6 +237,7 @@ export default function App() {
               lang={lang}
               contractorName={screen.contractorName}
               contractorPhone={screen.contractorPhone}
+              onBack={() => setScreen({ name: 'profile', userId: authState?.userId ?? '' })}
               onExit={() => {
                 localStorage.removeItem('mk_contractor_name');
                 localStorage.removeItem('mk_contractor_phone');
@@ -248,6 +251,20 @@ export default function App() {
           <ProfileDashboard
             lang={lang}
             userId={screen.userId}
+            onBack={() => {
+              if (authState?.role === 'worker') {
+                const wid = localStorage.getItem('mk_worker_id');
+                if (wid) setScreen({ name: 'worker_dashboard', workerId: wid });
+                else setScreen({ name: 'landing' });
+              } else if (authState?.role === 'contractor') {
+                const n = localStorage.getItem('mk_contractor_name');
+                const p = localStorage.getItem('mk_contractor_phone');
+                if (n && p) setScreen({ name: 'contractor_dashboard', contractorName: n, contractorPhone: p });
+                else setScreen({ name: 'landing' });
+              } else {
+                setScreen({ name: 'landing' });
+              }
+            }}
             onLogout={() => {
               setAuthState(null);
               localStorage.removeItem('mk_worker_id');
@@ -264,7 +281,7 @@ export default function App() {
             }}
           />
         )}
-        {screen.name === 'admin' && <AdminPanel onExit={() => setScreen({ name: 'landing' })} />}
+        {screen.name === 'admin' && <AdminPanel onExit={() => setScreen({ name: 'landing' })} onBack={() => setScreen({ name: 'landing' })} />}
       </div>
     </ToastProvider>
   );
