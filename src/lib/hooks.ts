@@ -12,25 +12,31 @@ export function useRealtime<T>(
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    let query = supabase.from(table).select(select);
-    if (orderBy) query = query.order(orderBy, { ascending });
     let active = true;
 
-    (async () => {
-      const { data: initial, error: e } = await query;
+    const fetchData = async () => {
+      let query = supabase.from(table).select(select);
+      if (orderBy) query = query.order(orderBy, { ascending });
+      const { data: result, error: e } = await query;
       if (!active) return;
-      if (e) setError(e.message);
-      else setData(initial as T[]);
+      if (e) {
+        setError(e.message);
+        setData([]);
+      } else {
+        setData(result as T[]);
+        setError(null);
+      }
       setLoading(false);
-    })();
+    };
+
+    fetchData().catch(() => {
+      if (active) { setData([]); setLoading(false); }
+    });
 
     const channel = supabase
       .channel(`rt-${table}-${Math.random().toString(36).slice(2)}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table }, async () => {
-        let refetch = supabase.from(table).select(select);
-        if (orderBy) refetch = refetch.order(orderBy, { ascending });
-        const { data: fresh } = await refetch;
-        if (active && fresh) setData(fresh as T[]);
+      .on('postgres_changes', { event: '*', schema: 'public', table }, () => {
+        fetchData();
       })
       .subscribe();
 
