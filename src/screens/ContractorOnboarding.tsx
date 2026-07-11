@@ -5,7 +5,7 @@ import { useToast } from '../components/Toast';
 import type { Lang } from '../lib/i18n';
 import { useT } from '../lib/i18n';
 
-export function ContractorOnboarding({ lang, onDone }: { lang: Lang; onDone: (name: string, phone: string) => void }) {
+export function ContractorOnboarding({ lang, userId: _userId, email: _email, onDone }: { lang: Lang; userId?: string; email?: string; onDone: (name: string, phone: string) => void }) {
   const t = useT(lang);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');

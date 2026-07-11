@@ -6,7 +6,7 @@ import { supabase, SKILLS, type Worker } from '../lib/supabase';
 import type { Lang, T } from '../lib/i18n';
 import { useT } from '../lib/i18n';
 
-export function WorkerOnboarding({ lang, onDone }: { lang: Lang; onDone: (w: Worker) => void }) {
+export function WorkerOnboarding({ lang, userId, email: _email, onDone }: { lang: Lang; userId?: string; email?: string; onDone: (w: Worker) => void }) {
   const t = useT(lang);
   const [step, setStep] = useState<1 | 2>(1);
   const [name, setName] = useState('');
@@ -56,6 +56,7 @@ export function WorkerOnboarding({ lang, onDone }: { lang: Lang; onDone: (w: Wor
         lat,
         lng,
         is_seed: false,
+        user_id: userId || null,
       })
       .select()
       .single();

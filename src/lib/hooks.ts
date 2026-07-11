@@ -27,7 +27,9 @@ export function useRealtime<T>(
     const channel = supabase
       .channel(`rt-${table}-${Math.random().toString(36).slice(2)}`)
       .on('postgres_changes', { event: '*', schema: 'public', table }, async () => {
-        const { data: fresh } = await supabase.from(table).select(select).then((r) => r);
+        let refetch = supabase.from(table).select(select);
+        if (orderBy) refetch = refetch.order(orderBy, { ascending });
+        const { data: fresh } = await refetch;
         if (active && fresh) setData(fresh as T[]);
       })
       .subscribe();
@@ -60,7 +62,7 @@ export function useEmergencyAlerts() {
   return useRealtime<EmergencyAlert>('emergency_alerts', '*', 'created_at', false);
 }
 export function useActivity() {
-  return useRealtime<Activity>('activity', '*', 'created_at', true);
+  return useRealtime<Activity>('activity', '*', 'created_at', false);
 }
 
 // Bharosa Score: f(completed/accepted ratio, no-show penalty, feedback avg)
