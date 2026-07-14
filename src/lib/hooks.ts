@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase, type Worker, type Job, type Match, type Ticket, type SosEvent, type Activity, type EmergencyAlert } from './supabase';
 
+// Simple polling hook — no Supabase Realtime WebSockets, just plain REST polling every 4s
 export function useRealtime<T>(
   table: string,
   select: string,
@@ -9,38 +10,43 @@ export function useRealtime<T>(
 ): { data: T[] | null; loading: boolean; error: string | null } {
   const [data, setData] = useState<T[] | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const activeRef = useRef(true);
 
   useEffect(() => {
-    let active = true;
+    activeRef.current = true;
 
     const fetchData = async () => {
-      let q = supabase.from(table).select(select);
-      if (orderBy) q = q.order(orderBy, { ascending });
-      const { data: rows, error: e } = await q;
-      if (!active) return;
-      if (e) {
-        console.error(`useRealtime(${table}) error:`, e.message);
+      try {
+        let q = supabase.from(table).select(select);
+        if (orderBy) q = q.order(orderBy, { ascending });
+        const { data: rows, error: e } = await q;
+        if (!activeRef.current) return;
+        if (e) {
+          console.error(`[${table}] fetch error:`, e.message);
+          setError(e.message);
+          setData([]);
+        } else {
+          setData((rows ?? []) as T[]);
+          setError(null);
+        }
+      } catch (err) {
+        if (!activeRef.current) return;
+        console.error(`[${table}] unexpected error:`, err);
         setData([]);
-      } else {
-        setData(rows as T[]);
+        setError(String(err));
       }
       setLoading(false);
     };
 
     fetchData();
-
-    const channel = supabase
-      .channel(`rt-${table}-${Math.random().toString(36).slice(2)}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table }, () => {
-        fetchData();
-      })
-      .subscribe();
+    const timer = setInterval(fetchData, 4000);
 
     return () => {
-      active = false;
-      supabase.removeChannel(channel);
+      activeRef.current = false;
+      clearInterval(timer);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [table, select, orderBy, ascending]);
 
   return { data, loading, error };
@@ -68,7 +74,6 @@ export function useActivity() {
   return useRealtime<Activity>('activity', '*', 'created_at', false);
 }
 
-// Bharosa Score: f(completed/accepted ratio, no-show penalty, feedback avg)
 export function computeBharosa(w: Pick<Worker, 'jobs_completed' | 'jobs_accepted' | 'feedback_sum' | 'feedback_count'>): number {
   const ratio = w.jobs_accepted > 0 ? w.jobs_completed / w.jobs_accepted : 0.5;
   const completionScore = Math.min(ratio, 1) * 60;
@@ -77,7 +82,6 @@ export function computeBharosa(w: Pick<Worker, 'jobs_completed' | 'jobs_accepted
   return Math.round(Math.min(completionScore + feedbackScore, 100));
 }
 
-// matchScore = bharosa*0.5 + proximityFit*0.3 + availabilityFreshness*0.2
 export function matchScore(
   w: Worker,
   _jobSkill: string,
