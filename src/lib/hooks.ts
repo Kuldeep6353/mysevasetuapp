@@ -52,8 +52,13 @@ export function useRealtime<T>(
   return { data, loading, error };
 }
 
+// Exclude photo_url from bulk fetches — some rows have multi-MB base64 strings
+// stored in photo_url (not URLs), which causes json_agg to timeout in PostgREST.
+// Avatar component handles null photo_url by showing initials.
+const WORKER_COLS = 'id,name,phone,skills,work_radius_km,women_safety,bharosa_score,jobs_completed,jobs_accepted,feedback_sum,feedback_count,status,lat,lng,schemes_registered,is_seed,created_at';
+
 export function useWorkers() {
-  return useRealtime<Worker>('workers', '*', 'created_at', false);
+  return useRealtime<Worker>('workers', WORKER_COLS, 'created_at', false);
 }
 export function useJobs() {
   return useRealtime<Job>('jobs', '*', 'created_at', false);
@@ -71,7 +76,7 @@ export function useEmergencyAlerts() {
   return useRealtime<EmergencyAlert>('emergency_alerts', '*', 'created_at', false);
 }
 export function useActivity() {
-  return useRealtime<Activity>('activity', '*', 'created_at', false);
+  return useRealtime<Activity>('activity', 'id,event_type,actor_name,detail,created_at', 'created_at', false);
 }
 
 export function computeBharosa(w: Pick<Worker, 'jobs_completed' | 'jobs_accepted' | 'feedback_sum' | 'feedback_count'>): number {

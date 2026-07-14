@@ -11,7 +11,7 @@ export type Worker = {
   id: string;
   name: string;
   phone: string;
-  photo_url: string | null;
+  photo_url?: string | null;
   skills: string[];
   work_radius_km: number;
   women_safety: boolean;
@@ -86,7 +86,7 @@ export type Activity = {
   event_type: string;
   actor_name: string;
   detail: string;
-  photo_url: string | null;
+  photo_url?: string | null;
   created_at: string;
 };
 

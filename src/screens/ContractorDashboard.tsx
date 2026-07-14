@@ -21,7 +21,7 @@ export function ContractorDashboard({ lang, contractorName, contractorPhone, onE
 
   // Map job_id -> list of workers who applied
   const applicantsByJob = useMemo(() => {
-    const map: Record<string, { match_id: string; name: string; skill: string; phone: string; photo_url: string | null; status: string; arrival_confirmed_by: string | null }[]> = {};
+    const map: Record<string, { match_id: string; name: string; skill: string; phone: string; photo_url?: string | null; status: string; arrival_confirmed_by: string | null }[]> = {};
     for (const m of matches ?? []) {
       const w = (workers ?? []).find((w) => w.id === m.worker_id);
       if (!w) continue;
@@ -287,7 +287,7 @@ function FindWorkers({ t }: { t: T }) {
   );
 }
 
-function JobApplicantCard({ job, applicants, t }: { job: Job; applicants: { match_id: string; name: string; skill: string; phone: string; photo_url: string | null; status: string; arrival_confirmed_by: string | null }[]; t: any }) {
+function JobApplicantCard({ job, applicants, t }: { job: Job; applicants: { match_id: string; name: string; skill: string; phone: string; photo_url?: string | null; status: string; arrival_confirmed_by: string | null }[]; t: any }) {
   const [expanded, setExpanded] = useState(false);
   const { toast } = useToast();
   return (
