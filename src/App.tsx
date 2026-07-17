@@ -43,6 +43,12 @@ export default function App() {
   // Restore session from Supabase auth + localStorage on mount
   useEffect(() => {
     (async () => {
+      // Trigger server-side auto-checkout (after 5:30 PM, sets on_job workers to available)
+      fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/auto-checkout`, {
+        method: 'GET',
+        headers: { apikey: import.meta.env.VITE_SUPABASE_ANON_KEY },
+      }).catch(() => {});
+
       const savedLang = (localStorage.getItem('mk_lang') ?? 'hi') as Lang;
       setLang(savedLang);
 

@@ -194,6 +194,9 @@ export type T = {
   profileDeleteNo: string;
   profileDeleted: string;
   profileSaved: string;
+  finishWork: string;
+  workFinished: string;
+  autoCheckout: string;
 };
 
 const translations: Record<Lang, T> = {
@@ -391,6 +394,9 @@ const translations: Record<Lang, T> = {
     profileDeleteNo: 'Cancel',
     profileDeleted: 'Account deleted successfully',
     profileSaved: 'Profile updated successfully',
+    finishWork: 'Finish Work / Exit Attendance',
+    workFinished: 'Work finished. You are now Available.',
+    autoCheckout: 'Auto checkout: workday ended (5:30 PM). You are now Available.',
   },
   hi: {
     appTagline: 'नका. डिजिटल. तुरंत.',
@@ -586,6 +592,9 @@ const translations: Record<Lang, T> = {
     profileDeleteNo: 'रद्द करें',
     profileDeleted: 'खाता सफलतापूर्वक हटाया गया',
     profileSaved: 'प्रोफ़ाइल सफलतापूर्वक अपडेट हुई',
+    finishWork: 'काम खत्म करें / हाजिरी बंद करें',
+    workFinished: 'काम पूरा हुआ। आप अब उपलब्ध हैं।',
+    autoCheckout: 'ऑटो चेकआउट: कामकाज का दिन खत्म (5:30 PM)। आप अब उपलब्ध हैं।',
   },
   gu: {
     appTagline: 'નાકા. ડિજિટલ. તુરત.',
@@ -781,6 +790,9 @@ const translations: Record<Lang, T> = {
     profileDeleteNo: 'રદ કરો',
     profileDeleted: 'એકાઉન્ટ સફળતાપૂર્વક કાઢી નાખ્યું',
     profileSaved: 'પ્રોફાઇલ સફળતાપૂર્વક અપડેટ થયું',
+    finishWork: 'કામ પૂરું કરો / હાજરી બંધ કરો',
+    workFinished: 'કામ પૂરું થયું. તમે હવે ઉપલબ્ધ છો.',
+    autoCheckout: 'ઓટો ચેકઆઉટ: કામનો દિવસ પૂરો (5:30 PM)। તમે હવે ઉપલબ્ધ છો.',
   },
   mr: {
     appTagline: 'नाका. डिजिटल. तत्काळ.',
@@ -976,6 +988,9 @@ const translations: Record<Lang, T> = {
     profileDeleteNo: 'रद्द करा',
     profileDeleted: 'खाते यशस्वीरित्या हटवले',
     profileSaved: 'प्रोफाइल यशस्वीरित्या अपडेट झाली',
+    finishWork: 'काम संपवा / हजेरी बंद करा',
+    workFinished: 'काम पूर्ण झाले. तुम्ही आता उपलब्ध आहात.',
+    autoCheckout: 'ऑटो चेकआउट: कामाचा दिवस संपला (5:30 PM)। तुम्ही आता उपलब्ध आहात.',
   },
   ta: {
     appTagline: 'நகா. டிஜிட்டல். உடனடி.',
@@ -1171,6 +1186,9 @@ const translations: Record<Lang, T> = {
     profileDeleteNo: 'ரத்து',
     profileDeleted: 'கணக்கு வெற்றிகரமாக நீக்கப்பட்டது',
     profileSaved: 'சுயவிவரம் வெற்றிகரமாக புதுப்பிக்கப்பட்டது',
+    finishWork: 'வேலை முடி / வருகை மூடு',
+    workFinished: 'வேலை முடிந்தது. நீங்கள் இப்போது கிடைக்கிறீர்கள்.',
+    autoCheckout: 'ஆட்டோ செக்அவுட்: வேலை நாள் முடிந்தது (5:30 PM)। நீங்கள் இப்போது கிடைக்கிறீர்கள்.',
   },
   te: {
     appTagline: 'నక. డిజిటల్. వెంటనే.',
@@ -1366,6 +1384,9 @@ const translations: Record<Lang, T> = {
     profileDeleteNo: 'రద్దు చేయి',
     profileDeleted: 'ఖాతా విజయవంతంగా తొలగించబడింది',
     profileSaved: 'ప్రొఫైల్ విజయవంతంగా నవీకరించబడింది',
+    finishWork: 'పని పూర్తి చేయండి / హాజరు మూసివేయండి',
+    workFinished: 'పని పూర్తయింది. మీరు ఇప్పుడు అందుబాటులో ఉన్నారు.',
+    autoCheckout: 'ఆటో చెక్‌అవుట్: పని రోజు ముగిసింది (5:30 PM)। మీరు ఇప్పుడు అందుబాటులో ఉన్నారు.',
   },
 };
 

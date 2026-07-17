@@ -47,6 +47,27 @@ export function WorkerDashboard({ lang, workerId, onExit, onBack }: { lang: Lang
       .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   }, [worker, jobs]);
 
+  // Auto-checkout: if past 5:30 PM and worker is on_job, set to available
+  useEffect(() => {
+    if (!worker || worker.status !== 'on_job') return;
+    const check = () => {
+      const now = new Date();
+      const afterWorkday = now.getHours() > 17 || (now.getHours() === 17 && now.getMinutes() >= 30);
+      if (afterWorkday) {
+        supabase.from('workers').update({ status: 'available' }).eq('id', workerId)
+          .then(() => toast(t.autoCheckout, 'success'));
+      }
+    };
+    check();
+    const timer = setInterval(check, 60000);
+    return () => clearInterval(timer);
+  }, [worker, workerId, t, toast]);
+
+  const finishWork = async () => {
+    await supabase.from('workers').update({ status: 'available' }).eq('id', workerId);
+    toast(t.workFinished, 'success');
+  };
+
   if (loading) return <div className="px-5 py-8"><Skeleton className="h-40" /></div>;
   if (!worker) return <EmptyState icon={<Icon.User size={28} />} title="Profile nahi mila" />;
 
@@ -164,6 +185,27 @@ export function WorkerDashboard({ lang, workerId, onExit, onBack }: { lang: Lang
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {/* Finish Work / Exit Attendance — visible when on_job */}
+        {worker.status === 'on_job' && (
+          <div className="card" style={{ border: '1px solid rgba(29,158,117,0.2)' }}>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(29,158,117,0.12)' }}>
+                <Icon.LogOut size={20} style={{ color: '#1D9E75' }} />
+              </div>
+              <div className="flex-1">
+                <p className="font-semibold text-sm" style={{ color: '#0B1957' }}>{t.finishWork}</p>
+                <p className="text-xs mt-0.5" style={{ color: 'rgba(11,25,87,0.5)' }}>
+                  {new Date().getHours() < 17 ? '5:30 PM pe auto checkout ho jayega' : 'Workday khatam — ab checkout karein'}
+                </p>
+              </div>
+              <button onClick={finishWork} className="btn-primary text-sm px-4 py-2.5 flex-shrink-0">
+                <Icon.Check size={16} />
+                {t.finishWork}
+              </button>
+            </div>
           </div>
         )}
 
